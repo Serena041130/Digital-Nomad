@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>引言 · 大曹采访</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{
+  width:100vw;height:100vh;
+  background:#F5F5E8;
+  font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+  overflow:hidden;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* 左上角章节标签 */
+.ch-label{
+  position:absolute;
+  top:32px;left:36px;
+  font-size:11px;
+  letter-spacing:0.25em;
+  color:#A8D400;
+  text-transform:uppercase;
+  font-weight:700;
+  opacity:0;
+  transition:opacity 0.6s ease;
+  z-index:5;
+}
+.ch-label.vis{opacity:1;}
+
+/* 视频容器：16:9 居中展示 */
+.video-wrap{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#F5F5E8;
+  display:block;
+}
+
+/* 底部渐变遮罩 */
+.bottom-fade{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:100px;
+  background:linear-gradient(to bottom, transparent, rgba(245,245,232,0.85));
+  pointer-events:none;
+  z-index:2;
+}
+
+/* 滚动提示 */
+.scroll-hint{
+  position:absolute;
+  bottom:32px;right:7vw;
+  display:flex;align-items:center;gap:7px;
+  opacity:0;
+  transition:opacity 0.6s ease;
+  z-index:6;
+}
+.scroll-hint.vis{
+  opacity:0.5;
+  animation:bounceY 2s ease-in-out infinite;
+}
+.scroll-hint span{
+  font-size:11px;letter-spacing:0.18em;
+  color:#5a7a52;text-transform:uppercase;
+}
+@keyframes bounceY{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(6px);}
+}
+</style>
+</head>
+<body>
+
+<div class="ch-label" id="chLabel">引言</div>
+
+<div class="video-wrap">
+  <video id="introVideo" controls playsinline>
+    <source src="daocao_intro_video.mp4" type="video/mp4">
+  </video>
+  <div class="bottom-fade"></div>
+</div>
+
+<div class="scroll-hint" id="scrollHint">
+  <span>Scroll</span>
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M8 2v12M2 9l6 6 6-6"
+      stroke="#5a7a52" stroke-width="1.4"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</div>
+
+<script>
+setTimeout(()=>document.getElementById('chLabel').classList.add('vis'), 200);
+
+const vid = document.getElementById('introVideo');
+const hint = document.getElementById('scrollHint');
+
+vid.addEventListener('ended', () => hint.classList.add('vis'));
+setTimeout(() => hint.classList.add('vis'), 8000);
+</script>
+
+
+<script>
+/* ===== 跨章节滚动切换（由外层合并页面注入，不影响本章节原有内容/动画） ===== */
+(function(){
+  var cooldown = false;
+  function notifyParent(dir){
+    if(cooldown) return;
+    cooldown = true;
+    try{ window.parent.postMessage({source:'daocao-page', dir:dir}, '*'); }catch(e){}
+    setTimeout(function(){ cooldown = false; }, 900);
+  }
+  function scroller(){ return document.scrollingElement || document.documentElement; }
+  function isScrollable(){ return scroller().scrollHeight > window.innerHeight + 2; }
+  function atTop(){ return scroller().scrollTop <= 1; }
+  function atBottom(){ return scroller().scrollTop + window.innerHeight >= scroller().scrollHeight - 1; }
+
+  window.addEventListener('wheel', function(e){
+    if(!isScrollable()){
+      notifyParent(e.deltaY > 0 ? 'next' : 'prev');
+      return;
+    }
+    if(e.deltaY > 0 && atBottom()) notifyParent('next');
+    else if(e.deltaY < 0 && atTop()) notifyParent('prev');
+  }, {passive:true});
+
+  var touchStartY = null;
+  window.addEventListener('touchstart', function(e){
+    touchStartY = e.touches[0].clientY;
+  }, {passive:true});
+  window.addEventListener('touchend', function(e){
+    if(touchStartY === null) return;
+    var dy = touchStartY - e.changedTouches[0].clientY;
+    touchStartY = null;
+    if(Math.abs(dy) < 40) return;
+    if(!isScrollable()){
+      notifyParent(dy > 0 ? 'next' : 'prev');
+      return;
+    }
+    if(dy > 0 && atBottom()) notifyParent('next');
+    else if(dy < 0 && atTop()) notifyParent('prev');
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>

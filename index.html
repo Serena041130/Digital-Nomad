@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>在"山野"办公，他们抛下工位去"流浪"</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html,body{
+    width:100%;height:100%;
+    font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+    background:#1c1c1c;
+    overflow:hidden;
+  }
+
+  /* ============ 左侧索引导航栏 ============ */
+  .nav-rail{
+    position:fixed;
+    top:0;left:0;
+    width:88px;height:100vh;
+    background:#1c1c1c;
+    border-right:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px 0;
+    z-index:1000;
+    transition:width 0.35s ease;
+    overflow:hidden;
+  }
+  .nav-rail:hover{ width:220px; }
+
+  .nav-rail-title{
+    font-size:11px;
+    letter-spacing:0.22em;
+    color:#A8D400;
+    text-transform:uppercase;
+    font-weight:700;
+    margin-bottom:36px;
+    white-space:nowrap;
+    opacity:0.9;
+  }
+
+  .nav-list{
+    list-style:none;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .nav-item{
+    position:relative;
+    width:100%;
+    display:flex;
+    align-items:center;
+    padding:11px 0;
+    cursor:pointer;
+    color:rgba(255,255,255,0.45);
+    transition:color 0.25s ease, background 0.25s ease;
+    white-space:nowrap;
+  }
+  .nav-item:hover{
+    color:#fff;
+    background:rgba(255,255,255,0.04);
+  }
+  .nav-item.active{
+    color:#fff;
+  }
+  .nav-item.active .nav-index{ color:#A8D400; }
+  .nav-item.active::before{
+    content:"";
+    position:absolute;
+    left:0;top:8px;bottom:8px;
+    width:3px;
+    background:#A8D400;
+    border-radius:0 2px 2px 0;
+  }
+
+  .nav-index{
+    flex:0 0 auto;
+    width:88px;
+    text-align:center;
+    font-size:11px;
+    letter-spacing:0.12em;
+    font-weight:700;
+    color:rgba(255,255,255,0.35);
+    font-family:"SF Mono","Helvetica Neue",monospace;
+    transition:color 0.25s ease;
+  }
+
+  .nav-label{
+    flex:1 1 auto;
+    font-size:13px;
+    letter-spacing:0.04em;
+    padding-right:18px;
+  }
+
+  /* ============ 进度条 ============ */
+  .progress-rail{
+    position:fixed;
+    right:10px; top:0;
+    width:3px; height:100vh;
+    background:rgba(255,255,255,0.06);
+    z-index:1000;
+  }
+  .progress-fill{
+    width:100%;
+    background:#A8D400;
+    height:11.11%;
+    transition:transform 0.5s cubic-bezier(.22,.61,.36,1);
+    transform:translateY(0%);
+  }
+
+  /* ============ 主内容区：纵向长滚动 + 分屏吸附 ============ */
+  .content{
+    position:fixed;
+    top:0;
+    left:88px;
+    width:calc(100% - 88px);
+    height:100vh;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    background:#F5F5E8;
+  }
+  .content::-webkit-scrollbar{ display:none; }
+
+  .page-wrap{
+    width:100%;
+    height:100vh;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    position:relative;
+  }
+
+  .page-frame{
+    width:100%;
+    height:100%;
+    border:none;
+    display:block;
+    background:#F5F5E8;
+  }
+
+  @media (max-width: 768px){
+    .nav-rail{ width:56px; }
+    .nav-rail:hover{ width:56px; }
+    .nav-rail-title{ display:none; }
+    .nav-label{ display:none; }
+    .nav-index{ width:56px; font-size:10px; }
+    .content{ left:56px; width:calc(100% - 56px); }
+    .progress-rail{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav-rail" id="navRail">
+  <div class="nav-rail-title">索引</div>
+  <ul class="nav-list" id="navList">
+    <li class="nav-item active" data-index="0">
+      <span class="nav-index">00</span><span class="nav-label">封面</span>
+    </li>
+    <li class="nav-item" data-index="1">
+      <span class="nav-index">01</span><span class="nav-label">引言 · 大曹</span>
+    </li>
+    <li class="nav-item" data-index="2">
+      <span class="nav-index">02</span><span class="nav-label">采访视频</span>
+    </li>
+    <li class="nav-item" data-index="3">
+      <span class="nav-index">03</span><span class="nav-label">第一章 · 他们是谁</span>
+    </li>
+    <li class="nav-item" data-index="4">
+      <span class="nav-index">04</span><span class="nav-label">数字游民画像</span>
+    </li>
+    <li class="nav-item" data-index="5">
+      <span class="nav-index">05</span><span class="nav-label">第二章 · 为什么出走</span>
+    </li>
+    <li class="nav-item" data-index="6">
+      <span class="nav-index">06</span><span class="nav-label">第三章 · 工作方式</span>
+    </li>
+    <li class="nav-item" data-index="7">
+      <span class="nav-index">07</span><span class="nav-label">第四章 · 生活哲学</span>
+    </li>
+    <li class="nav-item" data-index="8">
+      <span class="nav-index">08</span><span class="nav-label">结语</span>
+    </li>
+  </ul>
+</nav>
+
+<div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="content" id="content">
+  <div class="page-wrap"><iframe class="page-frame" id="frame-0" src="01_cover.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-1" src="02_intro_daocao.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-2" src="03_intro_video.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-3" src="04_story_tree.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-4" src="05_section_who.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-5" src="06_why_leave.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-6" src="07_how_work__1_.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-7" src="08_life_philosophy.html"></iframe></div>
+  <div class="page-wrap"><iframe class="page-frame" id="frame-8" src="09_epilogue.html"></iframe></div>
+</div>
+
+<script>
+const content = document.getElementById('content');
+const wraps = document.querySelectorAll('.page-wrap');
+const navItems = document.querySelectorAll('.nav-item');
+const progressFill = document.getElementById('progressFill');
+const TOTAL = wraps.length;
+let currentIndex = 0;
+
+function setActive(index){
+  index = Math.max(0, Math.min(TOTAL - 1, index));
+  currentIndex = index;
+  navItems.forEach(item => {
+    item.classList.toggle('active', parseInt(item.dataset.index, 10) === index);
+  });
+  progressFill.style.transform = `translateY(${index * 100}%)`;
+}
+
+function goTo(index){
+  index = Math.max(0, Math.min(TOTAL - 1, index));
+  wraps[index].scrollIntoView({ behavior:'smooth', block:'start' });
+  setActive(index);
+}
+
+/* 点击索引栏跳转 */
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    goTo(parseInt(item.dataset.index, 10));
+  });
+});
+
+/* 监听内容区滚动，更新当前激活的索引项与进度条（拖动滚动条 / 触控滚动时同步） */
+let scrollTimer = null;
+content.addEventListener('scroll', () => {
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    const idx = Math.round(content.scrollTop / window.innerHeight);
+    setActive(idx);
+  }, 120);
+}, { passive:true });
+
+/* 接收来自各章节 iframe 的滚动切换请求（长图式滑动切换章节） */
+window.addEventListener('message', (e) => {
+  if(!e.data || e.data.source !== 'daocao-page') return;
+  if(e.data.dir === 'next') goTo(currentIndex + 1);
+  else if(e.data.dir === 'prev') goTo(currentIndex - 1);
+});
+
+/* 在外层容器自身（鼠标悬停在索引栏/边缘空白处）也支持滚轮翻页 */
+let wheelCooldown = false;
+content.addEventListener('wheel', (e) => {
+  if(wheelCooldown) return;
+  wheelCooldown = true;
+  if(e.deltaY > 0) goTo(currentIndex + 1);
+  else if(e.deltaY < 0) goTo(currentIndex - 1);
+  setTimeout(() => { wheelCooldown = false; }, 900);
+}, { passive:true });
+
+/* 键盘上下方向键 / PageUp/PageDown 翻页 */
+window.addEventListener('keydown', (e) => {
+  if(['ArrowDown','PageDown',' '].includes(e.key)){ e.preventDefault(); goTo(currentIndex + 1); }
+  else if(['ArrowUp','PageUp'].includes(e.key)){ e.preventDefault(); goTo(currentIndex - 1); }
+});
+
+setActive(0);
+</script>
+
+</body>
+</html>
